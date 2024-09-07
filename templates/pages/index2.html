@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Качество воздуха в Бишкеке</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        /* Шапка */
+        header {
+            background-color: #033380ad;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Основной контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Основной контент и боковая панель */
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Левая панель (основная информация) */
+        .left-panel {
+            width: 70%;
+            padding-right: 20px;
+        }
+
+        /* Правая панель (дополнительные данные) */
+        .right-panel {
+            width: 30%;
+        }
+
+        /* Карточка AQI */
+        .aqi-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .aqi-card h2 {
+            margin-top: 0;
+        }
+
+        /* Блок данных AQI */
+        .aqi-index {
+            font-size: 64px;
+            font-weight: bold;
+            color: #00bfa5;
+            margin-bottom: 20px;
+        }
+
+        /* Параметры загрязнения */
+        .parameter {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .parameter:last-child {
+            border-bottom: none;
+        }
+
+        /* Карта */
+        .map-card {
+            margin-top: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        /* Боковая панель с дополнительной информацией */
+        .info-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        /* Футер */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #343a40;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Качество воздуха в Бишкеке</h1>
+        <p>Последние данные о качестве воздуха</p>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- Левая панель -->
+            <div class="left-panel">
+                <!-- Карточка AQI -->
+                <div class="aqi-card">
+                    <h2>Текущий индекс качества воздуха (AQI)</h2>
+                    <div class="aqi-index" id="aqi-index">153</div> <!-- Статичное значение AQI -->
+
+                    <!-- Параметры загрязнения воздуха -->
+                    <div class="parameter">
+                        <span>PM2.5</span>
+                        <span id="pm25-value">75 µg/m³</span> <!-- Статичное значение PM2.5 -->
+                    </div>
+                    <div class="parameter">
+                        <span>PM10</span>
+                        <span id="pm10-value">45 µg/m³</span> <!-- Статичное значение PM10 -->
+                    </div>
+                    <div class="parameter">
+                        <span>O3</span>
+                        <span id="o3-value">10 µg/m³</span> <!-- Статичное значение O3 -->
+                    </div>
+                    <div class="parameter">
+                        <span>NO2</span>
+                        <span id="no2-value">20 µg/m³</span> <!-- Статичное значение NO2 -->
+                    </div>
+                    <div class="parameter">
+                        <span>SO2</span>
+                        <span id="so2-value">12 µg/m³</span> <!-- Статичное значение SO2 -->
+                    </div>
+                    <div class="parameter">
+                        <span>CO</span>
+                        <span id="co-value">0.5 µg/m³</span> <!-- Статичное значение CO -->
+                    </div>
+                </div>
+
+                <!-- Карта с индексом загрязнения -->
+                <div class="map-card">
+                    <h2>Карта загрязнения воздуха</h2>
+                    <div id="map"></div>
+                </div>
+            </div>
+
+            <!-- Правая панель -->
+            <div class="right-panel">
+                <!-- Дополнительные данные -->
+                <div class="info-box">
+                    <h2>Дополнительная информация</h2>
+                    <p>Уровень загрязнения воздуха в Бишкеке превышает допустимые нормы и может быть опасен для здоровья.</p>
+                    <p>Рекомендуется носить маски и воздержаться от физических нагрузок на улице, особенно для лиц с заболеваниями дыхательной системы, детей и пожилых людей.</p>
+                </div>
+
+                <!-- Прогноз загрязнения -->
+                <div class="info-box">
+                    <h2>Прогноз загрязнения</h2>
+                    <ul>
+                        <li><strong>Завтра:</strong> Уровень PM2.5 может повыситься до 80 µg/m³, ожидается высокий уровень загрязнения.</li>
+                        <li><strong>Послезавтра:</strong> Уровень AQI ожидается на уровне 160, что соответствует категории "Нездоровый".</li>
+                        <li><strong>Через три дня:</strong> Прогнозируется небольшое улучшение, AQI около 140, что по-прежнему является "Нездоровым" для чувствительных групп.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Качество воздуха в Бишкеке</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Инициализация карты Leaflet для отображения Бишкека
+        var map = L.map('map').setView([42.8746, 74.5698], 12); // Координаты Бишкека
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Добавляем метку для Бишкека
+        L.marker([42.8746, 74.5698]).addTo(map)
+            .bindPopup('Бишкек')
+            .openPopup();
+    </script>
+</body>
+</html>
